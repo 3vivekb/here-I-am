@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Display a map with a custom style</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://unpkg.com/mapbox@1.0.0-beta9/dist/mapbox-sdk.min.js'></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
+var map = new mapboxgl.Map({
+    container: 'map', // container id
+    // style: 'mapbox://styles/3vivekb/cjb5mfe640l0n2rmh4d7g5tld', //hosted style id
+    style: 'mapbox://styles/3vivekb/cjb8jknss2uqo2ro6dxnn3nuj', //hosted style id
+    center: [-121.8, 37.5], // starting position
+    zoom: 9 // starting zoom
+});
+var radius = 20;
+
+function pointOnCircle(angle) {
+    return {
+        "type": "Point",
+        "coordinates": [
+            Math.cos(angle) * radius,
+            Math.sin(angle) * radius
+        ]
+    };
+}
+
+geolocate = new mapboxgl.GeolocateControl({
+    positionOptions: {
+        enableHighAccuracy: true, timeout:6000
+    },
+    trackUserLocation: true
+})
+
+map.addControl(geolocate);
+
+// geolocate.on('geolocate', (e, data) =>{
+//     console.log(geolocate._userLocationDotMarker._lngLat);console.log(data)})
+var k;
+
+// var client = new MapboxClient('pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA');
+var client = new MapboxClient('sk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjamI4dHllb3UwYTZkMnhxZmRsenNwdGN3In0.gS1zHJKlU7-b_g7iyPt50g');
+
+var people;
+client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
+  people = collection;
+});
+
+var feature;
+id_name = "Ari"
+geolocate.on('geolocate', (data) =>{
+    console.log(data);
+    k=data,
+    feature = {
+        "id": id_name,
+        "type": "Feature",
+        "properties":{"name":id_name},
+        "geometry": {
+        "type": "Point",
+        "coordinates": [k.coords.longitude, k.coords.latitude]
+        }
+    };
+client.insertFeature(feature, 'cjb8k3h6w05ww34pepjcqyl1r', function(err, feature) {
+  console.log(feature);
+});
+})
+
+
+map.on('load', function () {
+
+    map.addLayer({
+        "id": "points",
+        "type": "symbol",
+        "source": {
+            "type": "geojson",
+            "data": people
+        },
+        "layout": {
+            "icon-image": "monument-15",
+            "text-field": "{name}",
+            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+            "text-offset": [0, 0.6],
+            "text-anchor": "top"
+        }
+    });
+});
+
+// map.getSource('points').setData(people_old)
+
+names = []
+ids = []
+for (var i = 0; i < people.features.length; i++) {
+    names.push(people.features[i])
+    ids.push(people.features[i].id)
+}
+
+map.getSource('points').setData(people)
+client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
+  people = collection;
+});
+
+</script>
+
+</body>
+</html>

@@ -13,8 +13,20 @@
     </style>
 </head>
 <body>
-
 <div id='map'></div>
+<select id="friend_selector" onchange="panToFriend()">
+  <option>Find your friends</option>
+</select>
+<style>
+    #friend_selector {
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        right: 100px;
+        width: 120px;
+    }
+</style>
+
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
 var map = new mapboxgl.Map({
@@ -98,17 +110,37 @@ map.on('load', function () {
 
 // map.getSource('points').setData(people_old)
 
-names = []
-ids = []
-for (var i = 0; i < people.features.length; i++) {
+
+var people
+client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
+    people = collection;
+
+    names = []
+    ids = []
+    for (var i = 0; i < people.features.length; i++) {
     names.push(people.features[i])
     ids.push(people.features[i].id)
+    }
+
+    var friend_selector = document.getElementById("friend_selector");
+    for (var i = 0; i < ids.length; i++) {
+        var option = document.createElement("option");
+        option.text = ids[i];
+        friend_selector.add(option);
+    }
+});
+
+function panToFriend() {
+    var x = document.getElementById("friend_selector").value;
+    if (x != "Find your friends"){
+        coords = names.filter(name =>name.id == x)[0].geometry.coordinates
+        map.panTo(coords)
+    }
 }
 
-map.getSource('points').setData(people)
-client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
-  people = collection;
-});
+// map.getSource('points').setData(people)
+
+
 
 </script>
 

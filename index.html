@@ -1,56 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset='utf-8' />
-    <title>Here I am!  Find your friends and share your location.</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css' rel='stylesheet' />
-    <script src='https://unpkg.com/mapbox@1.0.0-beta9/dist/mapbox-sdk.min.js'></script>
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+  <meta charset='utf-8' />
+  <title>Here I am!  Find your friends and share your location.</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://unpkg.com/mapbox@1.0.0-beta9/dist/mapbox-sdk.min.js'></script>
+  <style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
 </head>
 <body>
-<div id='map'></div>
+  <div id='map'></div>
 
-<button id="nameBtn">What is your name?</button>
+  <button id="nameBtn">What is your name?</button>
 
-<!-- The Modal -->
-<div id="nameModal" class="modal">
+  <!-- The Modal -->
+  <div id="nameModal" class="modal">
 
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <p>What is your name?</p>
-    <input type="text" id="uname" name="name" onkeypress="eval_keypress(event)">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>What is your name?</p>
+      <input type="text" id="uname" name="name" onkeypress="eval_keypress(event)">
+    </div>
+
   </div>
 
-</div>
 
+  <select id="friend_selector" onchange="panToFriend()">
+    <option>Find your friends</option>
+  </select>
 
-<select id="friend_selector" onchange="panToFriend()">
-  <option>Find your friends</option>
-</select>
+  <style>
+  #friend_selector {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    right: 100px;
+    width: 120px;
+  }
 
-<style>
-    #friend_selector {
-        position: absolute;
-        z-index: 1;
-        top: 10px;
-        right: 100px;
-        width: 120px;
-    }
+  /* The Modal (background) */
+  #nameBtn {
+    position: absolute;
+    z-index: 1;
+  }
 
-/* The Modal (background) */
-    #nameBtn {
-        position: absolute;
-        z-index: 1;
-
-    }
-
-.modal {
+  .modal {
     /*display: none;  Hidden by default */
     position: absolute; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -62,51 +61,51 @@
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-/* Modal Content */
-.modal-content {
+  }
+  /* Modal Content */
+  .modal-content {
     background-color: #fefefe;
     margin: auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
-}
+  }
 
-/* The Close Button */
-.close {
+  /* The Close Button */
+  .close {
     color: #aaaaaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-}
+  }
 
-.close:hover,
-.close:focus {
+  .close:hover,
+  .close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
-}
+  }
 </style>
 
 <script>
-mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
-var map = new mapboxgl.Map({
+  mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
+  var map = new mapboxgl.Map({
     container: 'map', // container id
     // style: 'mapbox://styles/3vivekb/cjb5mfe640l0n2rmh4d7g5tld', //hosted style id
     style: 'mapbox://styles/3vivekb/cjb8jknss2uqo2ro6dxnn3nuj', //hosted style id
     center: [-121.8, 37.5], // starting position
     zoom: 9 // starting zoom
-});
-var radius = 20;
+  });
+  var radius = 20;
 
-geolocate = new mapboxgl.GeolocateControl({
+  geolocate = new mapboxgl.GeolocateControl({
     positionOptions: {
-        enableHighAccuracy: true, timeout:6000
+      enableHighAccuracy: true, timeout:6000
     },
     trackUserLocation: true
-})
+  })
 
-map.addControl(geolocate);
+  map.addControl(geolocate);
 
 // geolocate.on('geolocate', (e, data) =>{
 //     console.log(geolocate._userLocationDotMarker._lngLat);console.log(data)})
@@ -125,40 +124,40 @@ var userName;
 
 
 geolocate.on('geolocate', (data) =>{
-    console.log(data);
-    k=data,
-    feature = {
-        "id": userName,
-        "type": "Feature",
-        "properties":{"name":userName},
-        "geometry": {
-        "type": "Point",
-        "coordinates": [k.coords.longitude, k.coords.latitude]
-        }
-    };
-client.insertFeature(feature, 'cjb8k3h6w05ww34pepjcqyl1r', function(err, feature) {
-  console.log(feature);
-});
+  console.log(data);
+  k=data,
+  feature = {
+    "id": userName,
+    "type": "Feature",
+    "properties":{"name":userName},
+    "geometry": {
+      "type": "Point",
+      "coordinates": [k.coords.longitude, k.coords.latitude]
+    }
+  };
+  client.insertFeature(feature, 'cjb8k3h6w05ww34pepjcqyl1r', function(err, feature) {
+    console.log(feature);
+  });
 })
 
 
 map.on('load', function () {
 
-    map.addLayer({
-        "id": "points",
-        "type": "symbol",
-        "source": {
-            "type": "geojson",
-            "data": people
-        },
-        "layout": {
-            "icon-image": "monument-15",
-            "text-field": "{name}",
-            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-            "text-offset": [0, 0.6],
-            "text-anchor": "top"
-        }
-    });
+  map.addLayer({
+    "id": "points",
+    "type": "symbol",
+    "source": {
+      "type": "geojson",
+      "data": people
+    },
+    "layout": {
+      "icon-image": "monument-15",
+      "text-field": "{name}",
+      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+      "text-offset": [0, 0.6],
+      "text-anchor": "top"
+    }
+  });
 });
 
 // map.getSource('points').setData(people_old)
@@ -166,29 +165,29 @@ map.on('load', function () {
 
 var people
 client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
-    people = collection;
+  people = collection;
 
-    names = []
-    ids = []
-    for (var i = 0; i < people.features.length; i++) {
+  names = []
+  ids = []
+  for (var i = 0; i < people.features.length; i++) {
     names.push(people.features[i])
     ids.push(people.features[i].id)
-    }
+  }
 
-    var friend_selector = document.getElementById("friend_selector");
-    for (var i = 0; i < ids.length; i++) {
-        var option = document.createElement("option");
-        option.text = ids[i];
-        friend_selector.add(option);
-    }
+  var friend_selector = document.getElementById("friend_selector");
+  for (var i = 0; i < ids.length; i++) {
+    var option = document.createElement("option");
+    option.text = ids[i];
+    friend_selector.add(option);
+  }
 });
 
 function panToFriend() {
-    var x = document.getElementById("friend_selector").value;
-    if (x != "Find your friends"){
-        coords = names.filter(name =>name.id == x)[0].geometry.coordinates
-        map.panTo(coords)
-    }
+  var x = document.getElementById("friend_selector").value;
+  if (x != "Find your friends"){
+    coords = names.filter(name =>name.id == x)[0].geometry.coordinates
+    map.panTo(coords)
+  }
 }
 
 // map.getSource('points').setData(people)
@@ -204,32 +203,32 @@ var closeSpan = document.getElementsByClassName("close")[0];
 
 // When the user clicks the button, open the modal 
 btn.onclick = function() {
-    modal.style.display = "block";
+  modal.style.display = "block";
 }
 
 // When the user clicks on <span> (x), close the modal
 closeSpan.onclick = function() {
-    if (document.getElementById('uname').value.length == 0) {
-        alert("A man needs a name")
-    }
-    else {
-        modal.style.display = "none";
-        user_name = document.getElementById('uname').value
-    }
+  if (document.getElementById('uname').value.length == 0) {
+    alert("A man needs a name")
+  }
+  else {
+    modal.style.display = "none";
+    user_name = document.getElementById('uname').value
+  }
 }
 
 function eval_keypress(event) {
-    if ((event.which == 13 || event.keyCode == 13) && document.getElementById('uname').value.length == 0) {
-        alert("A man needs a name")
-        return true;
-    }
-    else if (event.which == 13 || event.keyCode == 13) {
-        console.log('enter')
-        user_name = document.getElementById('uname').value
-        modal.style.display = "none";
-        return false;
-    }
+  if ((event.which == 13 || event.keyCode == 13) && document.getElementById('uname').value.length == 0) {
+    alert("A man needs a name")
     return true;
+  }
+  else if (event.which == 13 || event.keyCode == 13) {
+    console.log('enter')
+    user_name = document.getElementById('uname').value
+    modal.style.display = "none";
+    return false;
+  }
+  return true;
 };
 // When the user clicks anywhere outside of the modal, close it
 // window.onclick = function(event) {
@@ -241,8 +240,6 @@ function eval_keypress(event) {
 //     }
 //     user_name = document.getElementById('uname').value
 // }
-
-
 
 
 </script>

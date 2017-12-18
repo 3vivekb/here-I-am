@@ -49,14 +49,14 @@
   }
 
   .modal {
-    /*display: none;  Hidden by default */
+    /*display: none;  Show by default */
     position: absolute; /* Stay in place */
     z-index: 1; /* Sit on top */
     padding-top: 100px; /* Location of the box */
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
+    width: 100%; 
+    height: 100%; 
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
@@ -88,6 +88,9 @@
 
 <script>
 
+  var userName;  //Store the users name
+  var people  //Store all the different people's location data here
+
   mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
   
   var client = new MapboxClient('sk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjamI4dHllb3UwYTZkMnhxZmRsenNwdGN3In0.gS1zHJKlU7-b_g7iyPt50g');
@@ -108,31 +111,32 @@
 
   map.addControl(geolocate);
 
-var userName;
-var people
-map.on('load', function () {
 
-client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
-  people = collection
-  map.addLayer({
-    "id": "points",
-    "type": "symbol",
-    "source": {
-      "type": "geojson",
-      "data": people
-    },
-    "layout": {
-      "icon-image": "monument-15",
-      "text-field": "{name}",
-      "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-      "text-offset": [0, 0.6],
-      "text-anchor": "top"
-    }
-  });
-refreshMap()
-})
+//Load the map, add a layer of the friends locations with little monument symbols.
+map.on('load', function () {
+  client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
+    people = collection
+    map.addLayer({
+      "id": "points",
+      "type": "symbol",
+      "source": {
+        "type": "geojson",
+        "data": people
+      },
+      "layout": {
+        "icon-image": "monument-11",
+        "text-field": "{name}",
+        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0.6],
+        "text-anchor": "top"
+      }
+    });
+    refreshMap()
+  })
 });
 
+
+// Pulls geospatial data from the mapbox service of different people.  Refreshes the map.
 function refreshMap(){
   client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
     people = collection;
@@ -157,24 +161,24 @@ function refreshMap(){
       friendSelector.add(option);
     }
 
-  map.getSource('points').setData(collection)
-  console.log("run")
+    map.getSource('points').setData(collection)
+    console.log("run")
   });
 }
 
+// Refresh the map every 20 seconds.
 setInterval(function(){ refreshMap(); }, 20000);
 
 
+//When you geolocate, send the users position to the mapbox dataset api so anyone using the app can see.
 geolocate.on('geolocate', (data) =>{
-  console.log(data);
-  k=data,
   feature = {
     "id": userName,
     "type": "Feature",
     "properties":{"name":userName},
     "geometry": {
       "type": "Point",
-      "coordinates": [k.coords.longitude, k.coords.latitude]
+      "coordinates": [data.coords.longitude, data.coords.latitude]
     }
   };
   if(typeof userName !== 'undefined'){
@@ -183,6 +187,7 @@ geolocate.on('geolocate', (data) =>{
 });
 
 
+//Pan to your friend.
 function panToFriend() {
   var x = document.getElementById("friendSelector").value;
   if (x != "Find your friends"){
@@ -192,6 +197,8 @@ function panToFriend() {
 }
 
 
+
+// Handling the modal
 // Get the modal
 var modal = document.getElementById('nameModal');
 
@@ -217,6 +224,7 @@ closeSpan.onclick = function() {
   }
 }
 
+// If a user hits enter and they entered a name, close the box.  Otherwise, complain.
 function eval_keypress(event) {
   if ((event.which == 13 || event.keyCode == 13) && document.getElementById('uname').value.length == 0) {
     alert("A man needs a name")

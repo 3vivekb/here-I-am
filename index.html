@@ -14,9 +14,26 @@
 </head>
 <body>
 <div id='map'></div>
+
+<button id="nameBtn">What is your name?</button>
+
+<!-- The Modal -->
+<div id="nameModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <p>What is your name?</p>
+    <input type="text" id="uname" name="name" onkeypress="eval_keypress(event)">
+  </div>
+
+</div>
+
+
 <select id="friend_selector" onchange="panToFriend()">
   <option>Find your friends</option>
 </select>
+
 <style>
     #friend_selector {
         position: absolute;
@@ -25,6 +42,50 @@
         right: 100px;
         width: 120px;
     }
+
+/* The Modal (background) */
+    #nameBtn {
+        position: absolute;
+        z-index: 1;
+
+    }
+
+.modal {
+    /*display: none;  Hidden by default */
+    position: absolute; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
 </style>
 
 <script>
@@ -60,14 +121,16 @@ client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
 });
 
 var feature;
-id_name = "Ari"
+var userName;
+
+
 geolocate.on('geolocate', (data) =>{
     console.log(data);
     k=data,
     feature = {
-        "id": id_name,
+        "id": userName,
         "type": "Feature",
-        "properties":{"name":id_name},
+        "properties":{"name":userName},
         "geometry": {
         "type": "Point",
         "coordinates": [k.coords.longitude, k.coords.latitude]
@@ -129,6 +192,56 @@ function panToFriend() {
 }
 
 // map.getSource('points').setData(people)
+
+// Get the modal
+var modal = document.getElementById('nameModal');
+
+// Get the button that opens the modal
+var btn = document.getElementById("nameBtn");
+
+// Get the <span> element that closes the modal
+var closeSpan = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+closeSpan.onclick = function() {
+    if (document.getElementById('uname').value.length == 0) {
+        alert("A man needs a name")
+    }
+    else {
+        modal.style.display = "none";
+        user_name = document.getElementById('uname').value
+    }
+}
+
+function eval_keypress(event) {
+    if ((event.which == 13 || event.keyCode == 13) && document.getElementById('uname').value.length == 0) {
+        alert("A man needs a name")
+        return true;
+    }
+    else if (event.which == 13 || event.keyCode == 13) {
+        console.log('enter')
+        user_name = document.getElementById('uname').value
+        modal.style.display = "none";
+        return false;
+    }
+    return true;
+};
+// When the user clicks anywhere outside of the modal, close it
+// window.onclick = function(event) {
+//     if (document.getElementById('uname').value.length == 0) {
+//         alert("A man needs a name")
+//     }
+//     else if (event.target == modal) {
+//         modal.style.display = "none";
+//     }
+//     user_name = document.getElementById('uname').value
+// }
+
 
 
 

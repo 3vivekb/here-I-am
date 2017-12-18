@@ -7,20 +7,14 @@
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css' rel='stylesheet' />
   <script src='https://unpkg.com/mapbox@1.0.0-beta9/dist/mapbox-sdk.min.js'></script>
-  <style>
-  body { margin:0; padding:0; }
-  #map { position:absolute; top:0; bottom:0; width:100%; }
-</style>
 </head>
 <body>
   <div id='map'></div>
 
   <button id="nameBtn">What is your name?</button>
 
-  <!-- The Modal -->
+  <!-- The Name Modal -->
   <div id="nameModal" class="modal">
-
-    <!-- Modal content -->
     <div class="modal-content">
       <span class="close">&times;</span>
       <p>What is your name?</p>
@@ -29,12 +23,14 @@
 
   </div>
 
-
   <select id="friendSelector" onchange="panToFriend()">
     <option>Find your friends</option>
   </select>
 
   <style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+
   #friendSelector {
     position: absolute;
     z-index: 1;
@@ -47,6 +43,8 @@
   #nameBtn {
     position: absolute;
     z-index: 1;
+    top: 10px;
+    left: 50px;
   }
 
   .modal {
@@ -92,7 +90,6 @@
   mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
   
   var client = new MapboxClient('sk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjamI4dHllb3UwYTZkMnhxZmRsenNwdGN3In0.gS1zHJKlU7-b_g7iyPt50g');
-
 
   var map = new mapboxgl.Map({
     container: 'map', // container id
@@ -242,13 +239,6 @@ function eval_keypress(event) {
 //     }
 //     user_name = document.getElementById('uname').value
 // }
-
-
-
-
-
-
-
 
 </script>
 

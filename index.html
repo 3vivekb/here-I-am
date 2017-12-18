@@ -30,12 +30,12 @@
   </div>
 
 
-  <select id="friend_selector" onchange="panToFriend()">
+  <select id="friendSelector" onchange="panToFriend()">
     <option>Find your friends</option>
   </select>
 
   <style>
-  #friend_selector {
+  #friendSelector {
     position: absolute;
     z-index: 1;
     top: 10px;
@@ -88,15 +88,18 @@
 </style>
 
 <script>
+
   mapboxgl.accessToken = 'pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA';
+  
+  var client = new MapboxClient('sk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjamI4dHllb3UwYTZkMnhxZmRsenNwdGN3In0.gS1zHJKlU7-b_g7iyPt50g');
+
+
   var map = new mapboxgl.Map({
     container: 'map', // container id
-    // style: 'mapbox://styles/3vivekb/cjb5mfe640l0n2rmh4d7g5tld', //hosted style id
     style: 'mapbox://styles/3vivekb/cjb8jknss2uqo2ro6dxnn3nuj', //hosted style id
     center: [-121.8, 37.5], // starting position
     zoom: 9 // starting zoom
   });
-  var radius = 20;
 
   geolocate = new mapboxgl.GeolocateControl({
     positionOptions: {
@@ -107,42 +110,12 @@
 
   map.addControl(geolocate);
 
-// geolocate.on('geolocate', (e, data) =>{
-//     console.log(geolocate._userLocationDotMarker._lngLat);console.log(data)})
-var k;
-
-// var client = new MapboxClient('pk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjaXdvbW55Z2owMDJiMnpxbm1leDZ2aHBiIn0.orlZinmbdNXaqaY8kdW4qA');
-var client = new MapboxClient('sk.eyJ1IjoiM3ZpdmVrYiIsImEiOiJjamI4dHllb3UwYTZkMnhxZmRsenNwdGN3In0.gS1zHJKlU7-b_g7iyPt50g');
-
-var people;
-client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
-  people = collection;
-});
-
-var feature;
 var userName;
-
-
-geolocate.on('geolocate', (data) =>{
-  console.log(data);
-  k=data,
-  feature = {
-    "id": userName,
-    "type": "Feature",
-    "properties":{"name":userName},
-    "geometry": {
-      "type": "Point",
-      "coordinates": [k.coords.longitude, k.coords.latitude]
-    }
-  };
-  client.insertFeature(feature, 'cjb8k3h6w05ww34pepjcqyl1r', function(err, feature) {
-    console.log(feature);
-  });
-})
-
-
+var people
 map.on('load', function () {
 
+client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
+  people = collection
   map.addLayer({
     "id": "points",
     "type": "symbol",
@@ -158,39 +131,68 @@ map.on('load', function () {
       "text-anchor": "top"
     }
   });
+refreshMap()
+})
 });
 
-// map.getSource('points').setData(people_old)
+function refreshMap(){
+  client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
+    people = collection;
+
+    names = []
+    ids = []
+    for (var i = 0; i < people.features.length; i++) {
+      names.push(people.features[i])
+      ids.push(people.features[i].id)
+    }
+
+    var friendSelector = document.getElementById("friendSelector");
+    //Remove all current friends in selector.
+    while(friendSelector[1]){
+      friendSelector.removeChild(friendSelector[1])
+    }
+
+    //Add all friends from 
+    for (var i = 0; i < ids.length; i++) {
+      var option = document.createElement("option");
+      option.text = ids[i];
+      friendSelector.add(option);
+    }
+
+  map.getSource('points').setData(collection)
+  console.log("run")
+  });
+}
+
+setInterval(function(){ refreshMap(); }, 20000);
 
 
-var people
-client.listFeatures('cjb8k3h6w05ww34pepjcqyl1r', {}, function(err, collection) {
-  people = collection;
-
-  names = []
-  ids = []
-  for (var i = 0; i < people.features.length; i++) {
-    names.push(people.features[i])
-    ids.push(people.features[i].id)
-  }
-
-  var friend_selector = document.getElementById("friend_selector");
-  for (var i = 0; i < ids.length; i++) {
-    var option = document.createElement("option");
-    option.text = ids[i];
-    friend_selector.add(option);
+geolocate.on('geolocate', (data) =>{
+  console.log(data);
+  k=data,
+  feature = {
+    "id": userName,
+    "type": "Feature",
+    "properties":{"name":userName},
+    "geometry": {
+      "type": "Point",
+      "coordinates": [k.coords.longitude, k.coords.latitude]
+    }
+  };
+  if(typeof userName !== 'undefined'){
+    client.insertFeature(feature, 'cjb8k3h6w05ww34pepjcqyl1r');
   }
 });
+
 
 function panToFriend() {
-  var x = document.getElementById("friend_selector").value;
+  var x = document.getElementById("friendSelector").value;
   if (x != "Find your friends"){
     coords = names.filter(name =>name.id == x)[0].geometry.coordinates
     map.panTo(coords)
   }
 }
 
-// map.getSource('points').setData(people)
 
 // Get the modal
 var modal = document.getElementById('nameModal');
@@ -213,7 +215,7 @@ closeSpan.onclick = function() {
   }
   else {
     modal.style.display = "none";
-    user_name = document.getElementById('uname').value
+    userName = document.getElementById('uname').value
   }
 }
 
@@ -224,7 +226,7 @@ function eval_keypress(event) {
   }
   else if (event.which == 13 || event.keyCode == 13) {
     console.log('enter')
-    user_name = document.getElementById('uname').value
+    userName = document.getElementById('uname').value
     modal.style.display = "none";
     return false;
   }
@@ -240,6 +242,12 @@ function eval_keypress(event) {
 //     }
 //     user_name = document.getElementById('uname').value
 // }
+
+
+
+
+
+
 
 
 </script>
